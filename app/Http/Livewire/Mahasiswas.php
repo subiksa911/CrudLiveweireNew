@@ -2,34 +2,32 @@
 
 namespace App\Http\Livewire;
 
+use App\Models\Jurusan;
 use Livewire\Component;
 use App\Models\Mahasiswa;
-use App\Models\Jurusan;
 use App\Models\Prodi;
-use Illuminate\Pagination\PaginationState;
+use Livewire\WithPagination;
 
 class Mahasiswas extends Component
 {
-    public $mahasiswas, $nama, $nim, $prodi, $jurusan, $alamat,$mahasiswaID, $searchQuery;
-    public $isModal;
 
+    use WithPagination;
+    public $mahasiswa, $nama, $nim, $prodi, $jurusan, $alamat,$mahasiswaID, $searchQuery;
+    public $isModal;
     public function render()
     {
+        $jurusans = Jurusan::all();
+        $prodis = Prodi::all();
         $searchQuery = '%'.$this->searchQuery.'%';
-
-        $this->mahasiswas = Mahasiswa::where('nama','LIKE',$searchQuery)
-                ->orWhere('nim','LIKE',$searchQuery)
-                ->orWhere('prodi','LIKE',$searchQuery)
-                ->orWhere('jurusan','LIKE',$searchQuery)
-                ->orWhere('alamat','LIKE',$searchQuery)
-                ->orderBy('created_at','DESC')->get();
-        return view('livewire.mahasiswas');
+        $mahasiswas = Mahasiswa::where('nama','LIKE',$searchQuery)
+                ->orderBy('created_at','DESC')->paginate(5);
+        return view('livewire.mahasiswas', compact('prodis','jurusans'),[
+            'mahasiswas'=>$mahasiswas
+        ]);
     }
-
     public function create()
     {
-        $jurusan = Jurusan::all();
-        $prodi = Prodi::all();
+
         $this->resetFields();
         $this->openModal();
     }
@@ -76,7 +74,7 @@ class Mahasiswas extends Component
 
             ]
             );
-            session()->flash('message', $this->mahasiswaID ? $this-> nama . ' Diperbaharui':$this->nama . ' Ditambahkan');
+            session()->flash('message', $this->mahasiswaID ? $this-> nama . ' Edited successfully':$this->nama . ' Added successfully');
             $this->closeModal();
             $this -> resetFields();
 
@@ -86,9 +84,8 @@ class Mahasiswas extends Component
 
     public function edit($id)
     {
-        $jurusan = Jurusan::all();
-        $prodi = Prodi::all();
-
+        $jurusans = Jurusan::all();
+        $prodis = Prodi::all();
         $mahasiswa = Mahasiswa::find($id);
         $this->mahasiswaID = $id;
         $this->nama = $mahasiswa->nama;
@@ -104,7 +101,7 @@ class Mahasiswas extends Component
     {
         $mahasiswa = Mahasiswa::find($id);
         $mahasiswa-> delete();
-        session()->flash('message', $mahasiswa->nama . ' Dihapus');
+        session()->flash('message', $mahasiswa->nama . ' Deleted successfully');
 
     }
 }

@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Livewire\Dosens;
 use Illuminate\Support\Facades\Route;
 use \App\Http\Livewire\Mahasiswas;
+use App\Http\Livewire\Point;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,10 +21,14 @@ Route::get('/', function () {
 });
 
 
-Route::group(['middleware'=> ['auth:sanctum', 'verified']],function() {
+Route::group(['middleware'=> ['auth:sanctum', 'verified','accessrole']],function() {
     Route::get('/dashboard',function(){
         return view('dashboard');
     })->name('dashboard');
 
-    Route::get('mahasiswa', mahasiswas::class)->name('mahasiswa');
+    Route::get('mahasiswa', Mahasiswas::class)->name('mahasiswa');
+    Route::get('dosen', Dosens::class)->name('dosen');
+    Route::get('system', Point::class)->name('system');
+
+
 });
